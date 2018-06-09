@@ -30,7 +30,8 @@ var _ = Describe("Config", func() {
 			          "ttl" : 5
 			    }
 			  ],
-			  "port" : 5050
+			  "port" : 5050,
+				"relay_server" : "8.8.8.8:53"
 			}
 			`
 			config, err = ParseConfig(configString)
@@ -55,6 +56,9 @@ var _ = Describe("Config", func() {
 		})
 		It("The first ip is 192.168.0.2", func() {
 			Ω(config.Domains[0].IPs[0].Address).Should(Equal("192.168.0.2"))
+		})
+		It("Relay Server should be 8.8.8.8:53", func() {
+			Ω(config.RelayServer).Should(Equal("8.8.8.8:53"))
 		})
 	})
 })

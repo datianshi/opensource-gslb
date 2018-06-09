@@ -11,7 +11,20 @@
               }
           ],
           "ttl" : 5
+    },
+    {
+          "name" : "example.io",
+          "ips": [
+              {
+                "address": "10.0.5.4"
+              },
+              {
+                "address": "10.0.5.5"
+              }
+          ],
+          "ttl" : 5
     }
   ],
-  "port" : 5050
+  "port" : 5050,
+  "relay_server" : "8.8.8.8:53"
 }

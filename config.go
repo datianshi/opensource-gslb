@@ -3,8 +3,9 @@ package gtm
 import "encoding/json"
 
 type Config struct {
-	Domains []Domain `json:"domains"`
-	Port    int      `json:"port"`
+	Domains     []Domain `json:"domains"`
+	Port        int      `json:"port"`
+	RelayServer string   `json:"relay_server"`
 }
 
 type Domain struct {

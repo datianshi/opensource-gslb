@@ -51,7 +51,7 @@ var _ = Describe("DNSRequest", func() {
 				var loadBalancer LoadBalancing = func(ips []IP) string {
 					return ips[0].Address
 				}
-				DNSRequest(domain)(loadBalancer)(dnsWriter, msgIn)
+				DNSRequest(LBAnswer(domain.IPs, domain.TTL)(loadBalancer))(dnsWriter, msgIn)
 			})
 			It("Should write message: ", func() {
 				Ω(msgAnswerCatcher.String()).Should(Equal("abc.xip.io.	5	IN	A	192.168.0.3"))
@@ -62,12 +62,13 @@ var _ = Describe("DNSRequest", func() {
 				var loadBalancer LoadBalancing = func(ips []IP) string {
 					return ips[1].Address
 				}
-				DNSRequest(domain)(loadBalancer)(dnsWriter, msgIn)
+				DNSRequest(LBAnswer(domain.IPs, domain.TTL)(loadBalancer))(dnsWriter, msgIn)
 			})
 			It("Should write message: ", func() {
 				Ω(msgAnswerCatcher.String()).Should(Equal("abc.xip.io.	5	IN	A	192.168.0.2"))
 			})
 		})
+
 	})
 
 })
