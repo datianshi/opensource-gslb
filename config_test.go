@@ -1,6 +1,8 @@
 package gtm_test
 
 import (
+	"strings"
+
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 
@@ -34,7 +36,7 @@ var _ = Describe("Config", func() {
 				"relay_server" : "8.8.8.8:53"
 			}
 			`
-			config, err = ParseConfig(configString)
+			config, err = ParseConfig(strings.NewReader(configString))
 		})
 		It("Should not have err happen", func() {
 			Ω(err).ShouldNot(HaveOccurred())

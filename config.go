@@ -1,6 +1,10 @@
 package gtm
 
-import "encoding/json"
+import (
+	"encoding/json"
+	"io"
+	"io/ioutil"
+)
 
 type Config struct {
 	Domains     []Domain `json:"domains"`
@@ -18,9 +22,14 @@ type IP struct {
 	HealthCheckM HealthCheck
 }
 
-func ParseConfig(s string) (*Config, error) {
+func ParseConfig(reader io.Reader) (*Config, error) {
+	bytes, err := ioutil.ReadAll(reader)
+	if err != nil {
+		return nil, err
+	}
+	s := []byte(bytes)
 	var domain Config
-	err := json.Unmarshal([]byte(s), &domain)
+	err = json.Unmarshal([]byte(s), &domain)
 	if err != nil {
 		return nil, err
 	}

@@ -9,11 +9,21 @@ import (
 
 	gtm "github.com/datianshi/simple-cf-gtm"
 	"github.com/miekg/dns"
+	"gopkg.in/alecthomas/kingpin.v2"
+)
+
+var (
+	config = kingpin.Flag("config", "DNS Load Balancer Config").Short('v').Required().String()
 )
 
 func main() {
-
-	config, err := gtm.ParseConfig(os.Getenv("GTM_CONFIG"))
+	kingpin.Parse()
+	file, err := os.Open(*config)
+	if err != nil {
+		log.Fatalf("can not open file: %s, %s", *config, err)
+	}
+	defer file.Close()
+	config, err := gtm.ParseConfig(file)
 	if err != nil {
 		fmt.Println(err)
 		return
