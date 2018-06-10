@@ -43,7 +43,7 @@ gtm --config config.json
 
 ### Domains
 
-For each domain, it will resolve every records underneath it to the provided ips
+For each domain, it will resolve every record underneath it to the provided ips
 
 E.g.
 
@@ -74,7 +74,7 @@ var simpleLoadBalancer gtm.LoadBalancing = func(ips []gtm.IP) string {
 
 The load balancing logic is pluggable as long as developer implement another load balancer method ```func(ips[]gtm.IP) string```
 
-##Future works
+## Future work
 
 * Specify particular A records underneath a domain
-* Configurable health check 
+* Configurable health check
