@@ -11,14 +11,15 @@ type LoadBalancing func([]IP) string
 
 type GetAnswer func(dns.Question) []dns.RR
 
-type HealthCheck func(IP) bool
-
-type Layer7HealthCheck func(string, string) HealthCheck
-
-type Layer4HealthCheck func(int) HealthCheck
+// type HealthCheck func([]IP) []IP
+//
+// type Layer7HealthCheck func(string, string) HealthCheck
+//
+// type Layer4HealthCheck func(int) HealthCheck
 
 type ServeDNS func(dns.ResponseWriter, *dns.Msg)
 
+//LBAnswer Given ips and ttl configuration, return a Get Answer func
 func LBAnswer(ips []IP, ttl int) func(loadBalancer LoadBalancing) GetAnswer {
 	return func(loadBalancer LoadBalancing) GetAnswer {
 		return func(q dns.Question) []dns.RR {
@@ -34,6 +35,10 @@ func LBAnswer(ips []IP, ttl int) func(loadBalancer LoadBalancing) GetAnswer {
 		}
 	}
 }
+
+// func (lb LoadBalancing) withHealthCheck(frequency time.Duration, hk HealthCheck) LoadBalancing {
+//
+// }
 
 // DNSRequest Serve DNS Request
 func DNSRequest(answerFunc GetAnswer) ServeDNS {
