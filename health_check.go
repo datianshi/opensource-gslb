@@ -4,31 +4,38 @@ import (
 	"time"
 )
 
-type HealthCheck interface {
-	Start() error
-	Receive() []IP
+type HealthCheckMethod func(IP) bool
+
+type doNothingHealthCheck struct {
+	ips []IP
 }
 
-type Layer4HealthCheckMethod func(string, int) bool
+//Start empty start method
+func (hk *doNothingHealthCheck) Start() {}
 
-type Layer4HealthCheck struct {
+//Receive empty
+func (hk *doNothingHealthCheck) Receive() []IP {
+	return hk.ips
+}
+
+type DefaultHealthCheck struct {
 	Port            int
 	EndPoints       []IP
 	healthEndpoints *[]IP
 	Frequency       time.Duration
 	control         chan []IP
-	CheckHealth     Layer4HealthCheckMethod
+	CheckHealth     HealthCheckMethod
 }
 
 //Start Start HealthCheck
-func (hk *Layer4HealthCheck) Start() {
+func (hk *DefaultHealthCheck) Start() {
 	hk.healthEndpoints = &hk.EndPoints
 	hk.control = make(chan []IP)
 	go func() {
 		for {
 			newEndpoint := make([]IP, 0)
 			for _, ip := range hk.EndPoints {
-				if hk.CheckHealth(ip.Address, hk.Port) {
+				if hk.CheckHealth(ip) {
 					newEndpoint = append(newEndpoint, ip)
 				}
 			}
@@ -38,7 +45,7 @@ func (hk *Layer4HealthCheck) Start() {
 	}()
 }
 
-func (hk *Layer4HealthCheck) Receive() []IP {
+func (hk *DefaultHealthCheck) Receive() []IP {
 	var ips []IP
 	select {
 	case ips = <-hk.control:

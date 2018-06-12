@@ -4,13 +4,18 @@
           "name" : "xip.io",
           "ips": [
               {
-                "address": "192.168.0.2"
+                "address": "10.193.190.182"
               },
               {
-                "address": "192.168.0.3"
+                "address": "10.193.148.200"
               }
           ],
-          "ttl" : 5
+          "ttl" : 5,
+          "health_check" : {
+            "type": "layer4",
+            "port": 443,
+            "frequency": "5s"
+          }
     },
     {
           "name" : "example.io",

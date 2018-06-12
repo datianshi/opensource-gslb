@@ -34,7 +34,7 @@ func main() {
 	}
 	// start server
 	for _, domain := range config.Domains {
-		dns.HandleFunc(domain.DomainName, gtm.DNSRequest(gtm.LBAnswer(domain.IPs, domain.TTL)(simpleLoadBalancer)))
+		dns.HandleFunc(domain.DomainName, gtm.DNSRequest(gtm.LBAnswer(domain.IPs, domain.TTL, domain.HealthCheck)(simpleLoadBalancer)))
 	}
 
 	if config.RelayServer != "" {

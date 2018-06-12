@@ -3,10 +3,9 @@ package gtm_test
 import (
 	"strings"
 
+	. "github.com/datianshi/simple-cf-gtm"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
-
-	. "github.com/datianshi/simple-cf-gtm"
 )
 
 var _ = Describe("Config", func() {
@@ -61,6 +60,48 @@ var _ = Describe("Config", func() {
 		})
 		It("Relay Server should be 8.8.8.8:53", func() {
 			Ω(config.RelayServer).Should(Equal("8.8.8.8:53"))
+		})
+		Context("When there is no health check config", func() {
+			It("Domain 1 should have dummy health check", func() {
+				Ω(config.Domains[0].HealthCheck).ShouldNot(BeNil())
+			})
+		})
+	})
+	Context("When there is health check config", func() {
+		BeforeEach(func() {
+			configString = `
+			{
+				"domains": [
+					{
+								"name" : ".xip.io",
+								"ips": [
+										{
+											"address": "192.168.0.2"
+										},
+										{
+											"address": "192.168.0.3"
+										}
+								],
+								"ttl" : 5,
+								"health_check" : {
+									"type": "layer4",
+									"port": 5000,
+									"frequency": "5s"
+								}
+					}
+				],
+
+				"port" : 5050,
+				"relay_server" : "8.8.8.8:53"
+			}
+			`
+			config, err = ParseConfig(strings.NewReader(configString))
+		})
+		It("error should be nil", func() {
+			Ω(err).ShouldNot(HaveOccurred())
+		})
+		It("Domain 0 should have a health check function", func() {
+			Ω(config.Domains[0].HealthCheck).ShouldNot(BeNil())
 		})
 	})
 })
