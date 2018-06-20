@@ -63,15 +63,15 @@ func testDNSRequest(t *testing.T, when spec.G, it spec.S) {
 			}
 		})
 
-		when("Given a domain has one record with 2 IP Options", func() {
+		when("Given one record with 2 IP Options", func() {
 			it.Before(func() {
 				record = &Record{
-					Name: ".xip.io",
+					Name: "abc",
 					IPs:  ips,
 					TTL:  5,
 				}
 
-				dummySelect = func(q dns.Question, records []*Record) *Record {
+				dummySelect = func(q dns.Question, records []*Record, domain string) *Record {
 					return record
 				}
 				healtchCheck.ReceiveStub = func() []IP {
@@ -91,7 +91,7 @@ func testDNSRequest(t *testing.T, when spec.G, it spec.S) {
 						catchNumberIps = len(ips)
 						return ips[0].Address
 					}
-					DNSRequest(LBAnswer([]*Record{record}, dummySelect)(loadBalancer))(dnsWriter, msgIn)
+					DNSRequest(LBAnswer([]*Record{record}, dummySelect, "xip.io")(loadBalancer))(dnsWriter, msgIn)
 				})
 				it("Should have only one ip passed in", func() {
 					Ω(catchNumberIps).Should(Equal(1))
@@ -102,7 +102,7 @@ func testDNSRequest(t *testing.T, when spec.G, it spec.S) {
 					var loadBalancer LoadBalancing = func(ips []IP) string {
 						return ips[0].Address
 					}
-					DNSRequest(LBAnswer([]*Record{record}, dummySelect)(loadBalancer))(dnsWriter, msgIn)
+					DNSRequest(LBAnswer([]*Record{record}, dummySelect, "xip.io")(loadBalancer))(dnsWriter, msgIn)
 				})
 				it("Should write message: ", func() {
 					Ω(msgAnswerCatcher.String()).Should(Equal("abc.xip.io.	5	IN	A	192.168.0.3"))
@@ -113,10 +113,73 @@ func testDNSRequest(t *testing.T, when spec.G, it spec.S) {
 					var loadBalancer LoadBalancing = func(ips []IP) string {
 						return ips[1].Address
 					}
-					DNSRequest(LBAnswer([]*Record{record}, dummySelect)(loadBalancer))(dnsWriter, msgIn)
+					DNSRequest(LBAnswer([]*Record{record}, dummySelect, "xip.io")(loadBalancer))(dnsWriter, msgIn)
 				})
 				it("Should write message: ", func() {
 					Ω(msgAnswerCatcher.String()).Should(Equal("abc.xip.io.	5	IN	A	192.168.0.2"))
+				})
+			})
+		})
+		when("Given serveral records, a domain", func() {
+			var (
+				records []*Record
+				domain  string
+			)
+			when("records has no wild card", func() {
+				it.Before(func() {
+					records = []*Record{
+						&Record{
+							Name: "abc",
+						},
+						&Record{
+							Name: "g",
+						},
+					}
+					domain = "xip.io."
+				})
+				it("Should return nil for question does not match", func() {
+					question := dns.Question{
+						Name: "notfound.xip.io.",
+					}
+					record = DefaultSelectRecord(question, records, domain)
+					Ω(record).Should(BeNil())
+				})
+				it("Should return match record with g", func() {
+					question := dns.Question{
+						Name: "g.xip.io.",
+					}
+					record = DefaultSelectRecord(question, records, domain)
+					Ω(record.Name).Should(Equal("g"))
+				})
+			})
+			when("records has wild card", func() {
+				it.Before(func() {
+					records = []*Record{
+						&Record{
+							Name: "abc",
+						},
+						&Record{
+							Name: "*",
+						},
+						&Record{
+							Name: "g",
+						},
+					}
+					domain = "xip.io."
+				})
+				it("Should return match record with g", func() {
+					question := dns.Question{
+						Name: "g.xip.io.",
+					}
+					record = DefaultSelectRecord(question, records, domain)
+					Ω(record.Name).Should(Equal("g"))
+				})
+				it("Should return match record with wild card", func() {
+					question := dns.Question{
+						Name: "cheer.xip.io.",
+					}
+					record = DefaultSelectRecord(question, records, domain)
+					Ω(record.Name).Should(Equal("*"))
 				})
 			})
 		})
