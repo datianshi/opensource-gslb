@@ -33,7 +33,12 @@ gtm --config config.json
                 "address": "10.0.5.5"
               }
           ],
-          "ttl" : 5
+          "ttl" : 5,
+          "health_check" : {
+            "type": "layer4",
+            "port": 5000,
+            "frequency": "5s"
+          }
     }
   ],
   "port" : 5050,
@@ -74,7 +79,18 @@ var simpleLoadBalancer gtm.LoadBalancing = func(ips []gtm.IP) string {
 
 The load balancing logic is pluggable as long as developer implement another load balancer method ```func(ips[]gtm.IP) string```
 
+## Layer4 Health Check
+
+For each domain, a layer 4 health check endpoint can be configured
+
+```
+"health_check" : {
+  "type": "layer4",
+  "port": 5000,
+  "frequency": "5s"
+}
+```
+
 ## Future work
 
 * Specify particular A records underneath a domain
-* Configurable health check
