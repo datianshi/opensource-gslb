@@ -20,6 +20,9 @@ func LBAnswer(records []*Record, getRecord SelectRecord, domain string) func(loa
 	return func(loadBalancer LoadBalancing) GetAnswer {
 		return func(q dns.Question) []dns.RR {
 			record := getRecord(q, records, domain)
+			if record == nil {
+				return make([]dns.RR, 0)
+			}
 			ip := loadBalancer(record.HealthCheck.Receive())
 			if ip == "" {
 				return make([]dns.RR, 0)

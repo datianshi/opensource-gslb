@@ -54,6 +54,9 @@ func testDNSRequest(t *testing.T, when spec.G, it spec.S) {
 			dnsWriter = &fakes.FakeResponseWriter{}
 			healtchCheck = &fakes.FakeHealthCheck{}
 			dnsWriter.WriteMsgStub = func(msg *dns.Msg) error {
+				if len(msg.Answer) == 0 {
+					return nil
+				}
 				msgAnswerCatcher = msg.Answer[0]
 				return nil
 			}
@@ -117,6 +120,20 @@ func testDNSRequest(t *testing.T, when spec.G, it spec.S) {
 				})
 				it("Should write message: ", func() {
 					Ω(msgAnswerCatcher.String()).Should(Equal("abc.xip.io.	5	IN	A	192.168.0.2"))
+				})
+			})
+			when("The select record return nil", func() {
+				it.Before(func() {
+					var loadBalancer LoadBalancing = func(ips []IP) string {
+						return ips[1].Address
+					}
+					dummySelect = func(q dns.Question, records []*Record, domain string) *Record {
+						return nil
+					}
+					DNSRequest(LBAnswer([]*Record{record}, dummySelect, "xip.io")(loadBalancer))(dnsWriter, msgIn)
+				})
+				it("Should write empty: ", func() {
+					Ω(msgAnswerCatcher).Should(BeNil())
 				})
 			})
 		})

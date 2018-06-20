@@ -1,33 +1,55 @@
 {
   "domains": [
     {
-          "name" : "xip.io",
-          "ips": [
-              {
-                "address": "10.193.190.181"
-              },
-              {
-                "address": "10.193.148.200"
-              }
-          ],
-          "ttl" : 5,
-          "health_check" : {
-            "type": "layer4",
-            "port": 443,
-            "frequency": "5s"
+        "name" : "xip.io.",
+        "records": [
+          {
+            "name": "abc",
+            "ips": [
+                {
+                  "address": "10.193.190.181"
+                },
+                {
+                  "address": "10.193.148.200"
+                }
+            ],
+            "ttl" : 5
+          },
+          {
+            "name": "*",
+            "ips": [
+                {
+                  "address": "10.193.190.103"
+                },
+                {
+                  "address": "10.193.148.251"
+                }
+            ],
+            "ttl" : 10,
+            "health_check" : {
+              "type": "layer4",
+              "port": 443,
+              "frequency": "5s"
+            }
           }
+        ]
     },
     {
-          "name" : "example.io",
-          "ips": [
-              {
-                "address": "10.0.5.4"
-              },
-              {
-                "address": "10.0.5.5"
-              }
-          ],
-          "ttl" : 5
+          "name" : "example.io.",
+          "records" : [
+            {
+              "name": "*",
+              "ips": [
+                  {
+                    "address": "10.0.5.4"
+                  },
+                  {
+                    "address": "10.0.5.5"
+                  }
+              ],
+              "ttl" : 5
+            }
+          ]
     }
   ],
   "port" : 5050,
