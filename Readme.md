@@ -12,33 +12,55 @@ gtm --config config.json
 {
   "domains": [
     {
-          "name" : "xip.io",
-          "ips": [
-              {
-                "address": "192.168.0.2"
-              },
-              {
-                "address": "192.168.0.3"
-              }
-          ],
-          "ttl" : 5
+        "name" : "xip.io.",
+        "records": [
+          {
+            "name": "abc",
+            "ips": [
+                {
+                  "address": "10.193.190.181"
+                },
+                {
+                  "address": "10.193.148.200"
+                }
+            ],
+            "ttl" : 5
+          },
+          {
+            "name": "*",
+            "ips": [
+                {
+                  "address": "10.193.190.103"
+                },
+                {
+                  "address": "10.193.148.251"
+                }
+            ],
+            "ttl" : 10,
+            "health_check" : {
+              "type": "layer4",
+              "port": 443,
+              "frequency": "5s"
+            }
+          }
+        ]
     },
     {
-          "name" : "example.io",
-          "ips": [
-              {
-                "address": "10.0.5.4"
-              },
-              {
-                "address": "10.0.5.5"
-              }
-          ],
-          "ttl" : 5,
-          "health_check" : {
-            "type": "layer4",
-            "port": 5000,
-            "frequency": "5s"
-          }
+          "name" : "example.io.",
+          "records" : [
+            {
+              "name": "*",
+              "ips": [
+                  {
+                    "address": "10.0.5.4"
+                  },
+                  {
+                    "address": "10.0.5.5"
+                  }
+              ],
+              "ttl" : 5
+            }
+          ]
     }
   ],
   "port" : 5050,
@@ -46,17 +68,22 @@ gtm --config config.json
 }
 ```
 
-### Domains
+### Domain and records
 
-For each domain, it will resolve every record underneath it to the provided ips
+* It supports wild card records
+E.g.
+```
+dig [anything].xip.io @localhost -p 5050
+```
+will results either 10.193.190.103 or 10.193.148.251
 
+* It supports a specify record and will take precedence over  
 E.g.
 
 ```
-dig [anything].xip.xio @localhost -p 5050
+dig abc.xip.io @localhost -p 5050
 ```
-
-will results either 192.168.0.2 or 192.168.0.3
+will results either 10.193.190.181 or 10.193.148.200
 
 ### Port
 
@@ -64,7 +91,7 @@ Port Number DNS server should listen on.
 
 ### Relay Server
 
-If the records/domains not defined in the domains, they will be resolved from the relay server
+If the records/domains not defined in the configured domains, they will be resolved from the relay server
 
 ## Plugin in your own Load Balancing logic
 
@@ -81,7 +108,7 @@ The load balancing logic is pluggable as long as developer implement another loa
 
 ## Layer4 Health Check
 
-For each domain, a layer 4 health check endpoint can be configured
+For each record, a layer 4 health check endpoint can be configured
 
 ```
 "health_check" : {
@@ -93,4 +120,4 @@ For each domain, a layer 4 health check endpoint can be configured
 
 ## Future work
 
-* Specify particular A records underneath a domain
+* Layer 7 Health Check
