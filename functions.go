@@ -13,15 +13,18 @@ type GetAnswer func(dns.Question) []dns.RR
 
 type ServeDNS func(dns.ResponseWriter, *dns.Msg)
 
+type SelectRecord func(q dns.Question, records []*Record) *Record
+
 //LBAnswer Given ips and ttl configuration, return a Get Answer func
-func LBAnswer(ips []IP, ttl int, h HealthCheck) func(loadBalancer LoadBalancing) GetAnswer {
+func LBAnswer(records []*Record, getRecord SelectRecord) func(loadBalancer LoadBalancing) GetAnswer {
 	return func(loadBalancer LoadBalancing) GetAnswer {
 		return func(q dns.Question) []dns.RR {
-			ip := loadBalancer(h.Receive())
+			record := getRecord(q, records)
+			ip := loadBalancer(record.HealthCheck.Receive())
 			if ip == "" {
 				return make([]dns.RR, 0)
 			}
-			rr, err := dns.NewRR(fmt.Sprintf("%s %d A %s", q.Name, ttl, ip))
+			rr, err := dns.NewRR(fmt.Sprintf("%s %d A %s", q.Name, record.TTL, ip))
 			if err != nil {
 				return make([]dns.RR, 0)
 			}
