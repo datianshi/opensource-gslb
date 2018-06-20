@@ -19,12 +19,17 @@ type Config struct {
 	RelayServer string    `json:"relay_server"`
 }
 
-type Domain struct {
-	DomainName        string            `json:"name"`
+type Record struct {
+	Name              string            `json:"name"`
 	IPs               []IP              `json:"ips"`
 	TTL               int               `json:"ttl"`
 	HealthCheckConfig HealthCheckConfig `json:"health_check"`
 	HealthCheck       HealthCheck
+}
+
+type Domain struct {
+	DomainName string    `json:"name"`
+	Records    []*Record `json:"records"`
 }
 
 //HealthCheckConfig Config for health check
@@ -54,25 +59,26 @@ func ParseConfig(reader io.Reader) (*Config, error) {
 	}
 	for _, domain := range config.Domains {
 		var hk HealthCheckMethod
-		if domain.HealthCheckConfig.Type == "layer4" {
-			frequency, err := time.ParseDuration(domain.HealthCheckConfig.Fequency)
-			if err != nil {
-				return nil, fmt.Errorf("format of frequency is not valid: %v", err)
+		for _, record := range domain.Records {
+			if record.HealthCheckConfig.Type == "layer4" {
+				frequency, err := time.ParseDuration(record.HealthCheckConfig.Fequency)
+				if err != nil {
+					return nil, fmt.Errorf("format of frequency is not valid: %v", err)
+				}
+				hk = Layer4HealthCheck(record.HealthCheckConfig.PORT)
+				record.HealthCheck = &DefaultHealthCheck{
+					EndPoints:   record.IPs,
+					Frequency:   frequency,
+					CheckHealth: hk,
+					SleepFunc:   sleepDuration(frequency),
+				}
+			} else {
+				record.HealthCheck = &doNothingHealthCheck{
+					ips: record.IPs,
+				}
 			}
-			hk = Layer4HealthCheck(domain.HealthCheckConfig.PORT)
-			domain.HealthCheck = &DefaultHealthCheck{
-				EndPoints:   domain.IPs,
-				Frequency:   frequency,
-				CheckHealth: hk,
-				SleepFunc:   sleepDuration(frequency),
-			}
-		} else {
-			domain.HealthCheck = &doNothingHealthCheck{
-				ips: domain.IPs,
-			}
+			record.HealthCheck.Start()
 		}
-
-		domain.HealthCheck.Start()
 
 	}
 	return &config, err

@@ -34,7 +34,7 @@ func testDNSRequest(t *testing.T, when spec.G, it spec.S) {
 	when("test dns request", func() {
 		var dnsWriter *fakes.FakeResponseWriter
 		var msgIn *dns.Msg
-		var domain Domain
+		var record Record
 		var healtchCheck *fakes.FakeHealthCheck
 		var ips []IP
 		var msgAnswerCatcher dns.RR
@@ -64,10 +64,10 @@ func testDNSRequest(t *testing.T, when spec.G, it spec.S) {
 
 		when("Given a domain has 2 IP Options", func() {
 			it.Before(func() {
-				domain = Domain{
-					DomainName: ".xip.io",
-					IPs:        ips,
-					TTL:        5,
+				record = Record{
+					Name: ".xip.io",
+					IPs:  ips,
+					TTL:  5,
 				}
 				healtchCheck.ReceiveStub = func() []IP {
 					return ips
@@ -85,7 +85,7 @@ func testDNSRequest(t *testing.T, when spec.G, it spec.S) {
 						catchNumberIps = len(ips)
 						return ips[0].Address
 					}
-					DNSRequest(LBAnswer(domain.IPs, domain.TTL, healtchCheck)(loadBalancer))(dnsWriter, msgIn)
+					DNSRequest(LBAnswer(record.IPs, record.TTL, healtchCheck)(loadBalancer))(dnsWriter, msgIn)
 				})
 				it("Should have only one ip passed in", func() {
 					Ω(catchNumberIps).Should(Equal(1))
@@ -96,7 +96,7 @@ func testDNSRequest(t *testing.T, when spec.G, it spec.S) {
 					var loadBalancer LoadBalancing = func(ips []IP) string {
 						return ips[0].Address
 					}
-					DNSRequest(LBAnswer(domain.IPs, domain.TTL, healtchCheck)(loadBalancer))(dnsWriter, msgIn)
+					DNSRequest(LBAnswer(record.IPs, record.TTL, healtchCheck)(loadBalancer))(dnsWriter, msgIn)
 				})
 				it("Should write message: ", func() {
 					Ω(msgAnswerCatcher.String()).Should(Equal("abc.xip.io.	5	IN	A	192.168.0.3"))
@@ -107,7 +107,7 @@ func testDNSRequest(t *testing.T, when spec.G, it spec.S) {
 					var loadBalancer LoadBalancing = func(ips []IP) string {
 						return ips[1].Address
 					}
-					DNSRequest(LBAnswer(domain.IPs, domain.TTL, healtchCheck)(loadBalancer))(dnsWriter, msgIn)
+					DNSRequest(LBAnswer(record.IPs, record.TTL, healtchCheck)(loadBalancer))(dnsWriter, msgIn)
 				})
 				it("Should write message: ", func() {
 					Ω(msgAnswerCatcher.String()).Should(Equal("abc.xip.io.	5	IN	A	192.168.0.2"))

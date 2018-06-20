@@ -21,15 +21,20 @@ func testConfig(t *testing.T, when spec.G, it spec.S) {
 			  "domains": [
 			    {
 			          "name" : ".xip.io",
-			          "ips": [
-			              {
-			                "address": "192.168.0.2"
-			              },
-			              {
-			                "address": "192.168.0.3"
-			              }
-			          ],
-			          "ttl" : 5
+								"records": [
+									{
+										"name": "*.xip.io.",
+					          "ips": [
+					              {
+					                "address": "192.168.0.2"
+					              },
+					              {
+					                "address": "192.168.0.3"
+					              }
+					          ],
+					          "ttl" : 5
+									}
+								]
 			    }
 			  ],
 			  "port" : 5050,
@@ -48,23 +53,23 @@ func testConfig(t *testing.T, when spec.G, it spec.S) {
 			Ω(config.Port).Should(Equal(5050))
 		})
 		it("The domain ttl should be 5", func() {
-			Ω(config.Domains[0].TTL).Should(Equal(5))
+			Ω(config.Domains[0].Records[0].TTL).Should(Equal(5))
 		})
 		it("The domain's name should be .xip.io", func() {
 			Ω(config.Domains[0].DomainName).Should(Equal(".xip.io"))
 		})
 		it("The domain have two ips", func() {
-			Ω(len(config.Domains[0].IPs)).Should(Equal(2))
+			Ω(len(config.Domains[0].Records[0].IPs)).Should(Equal(2))
 		})
 		it("The first ip is 192.168.0.2", func() {
-			Ω(config.Domains[0].IPs[0].Address).Should(Equal("192.168.0.2"))
+			Ω(config.Domains[0].Records[0].IPs[0].Address).Should(Equal("192.168.0.2"))
 		})
 		it("Relay Server should be 8.8.8.8:53", func() {
 			Ω(config.RelayServer).Should(Equal("8.8.8.8:53"))
 		})
 		when("When there is no health check config", func() {
-			it("Domain 1 should have dummy health check", func() {
-				Ω(config.Domains[0].HealthCheck).ShouldNot(BeNil())
+			it("Domain 1 record should have dummy health check", func() {
+				Ω(config.Domains[0].Records[0].HealthCheck).ShouldNot(BeNil())
 			})
 		})
 	})
@@ -75,20 +80,25 @@ func testConfig(t *testing.T, when spec.G, it spec.S) {
 				"domains": [
 					{
 								"name" : ".xip.io",
-								"ips": [
-										{
-											"address": "192.168.0.2"
-										},
-										{
-											"address": "192.168.0.3"
+								"records": [
+									{
+										"name" : "*.xip.io",
+										"ips": [
+												{
+													"address": "192.168.0.2"
+												},
+												{
+													"address": "192.168.0.3"
+												}
+										],
+										"ttl" : 5,
+										"health_check" : {
+											"type": "layer4",
+											"port": 5000,
+											"frequency": "5s"
 										}
-								],
-								"ttl" : 5,
-								"health_check" : {
-									"type": "layer4",
-									"port": 5000,
-									"frequency": "5s"
-								}
+									}
+								]
 					}
 				],
 
@@ -102,7 +112,7 @@ func testConfig(t *testing.T, when spec.G, it spec.S) {
 			Ω(err).ShouldNot(HaveOccurred())
 		})
 		it("Domain 0 should have a health check function", func() {
-			Ω(config.Domains[0].HealthCheck).ShouldNot(BeNil())
+			Ω(config.Domains[0].Records[0].HealthCheck).ShouldNot(BeNil())
 		})
 	})
 }
