@@ -65,10 +65,13 @@ func ParseConfig(reader io.Reader) (*Config, error) {
 				Frequency:   frequency,
 				CheckHealth: hk,
 			}
+		} else {
+			domain.HealthCheck = &doNothingHealthCheck{
+				ips: domain.IPs,
+			}
 		}
-		domain.HealthCheck = &doNothingHealthCheck{
-			ips: domain.IPs,
-		}
+
+		domain.HealthCheck.Start()
 
 	}
 	return &config, err

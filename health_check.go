@@ -1,6 +1,7 @@
 package gtm
 
 import (
+	"log"
 	"time"
 )
 
@@ -18,6 +19,14 @@ func (hk *doNothingHealthCheck) Receive() []IP {
 	return hk.ips
 }
 
+type sleep func()
+
+func sleepSeconds(sec int64) sleep {
+	return func() {
+		time.Sleep(time.Duration(sec) * time.Second)
+	}
+}
+
 type DefaultHealthCheck struct {
 	Port            int
 	EndPoints       []IP
@@ -25,10 +34,16 @@ type DefaultHealthCheck struct {
 	Frequency       time.Duration
 	control         chan []IP
 	CheckHealth     HealthCheckMethod
+	SleepFunc       sleep
+	started         bool
 }
 
 //Start Start HealthCheck
 func (hk *DefaultHealthCheck) Start() {
+	if hk.started {
+		log.Println("Health Check already started")
+		return
+	}
 	hk.healthEndpoints = &hk.EndPoints
 	hk.control = make(chan []IP)
 	go func() {
@@ -40,17 +55,14 @@ func (hk *DefaultHealthCheck) Start() {
 				}
 			}
 			hk.healthEndpoints = &newEndpoint
-			hk.control <- newEndpoint
+			hk.SleepFunc()
 		}
 	}()
+	hk.started = true
 }
 
 func (hk *DefaultHealthCheck) Receive() []IP {
 	var ips []IP
-	select {
-	case ips = <-hk.control:
-	default:
-		ips = *hk.healthEndpoints
-	}
+	ips = *hk.healthEndpoints
 	return ips
 }
