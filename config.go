@@ -64,6 +64,7 @@ func ParseConfig(reader io.Reader) (*Config, error) {
 				EndPoints:   domain.IPs,
 				Frequency:   frequency,
 				CheckHealth: hk,
+				SleepFunc:   sleepDuration(frequency),
 			}
 		} else {
 			domain.HealthCheck = &doNothingHealthCheck{

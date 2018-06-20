@@ -21,9 +21,9 @@ func (hk *doNothingHealthCheck) Receive() []IP {
 
 type sleep func()
 
-func sleepSeconds(sec int64) sleep {
+func sleepDuration(d time.Duration) sleep {
 	return func() {
-		time.Sleep(time.Duration(sec) * time.Second)
+		time.Sleep(d)
 	}
 }
 
