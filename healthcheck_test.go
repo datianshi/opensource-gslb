@@ -7,17 +7,9 @@ import (
 	. "github.com/datianshi/simple-cf-gtm"
 	. "github.com/onsi/gomega"
 	"github.com/sclevine/spec"
-	"github.com/sclevine/spec/report"
 )
 
-func TestHealthcheck(t *testing.T) {
-	spec.Run(t, "TestHealthCheck", testHealthCheck, spec.Report(report.Terminal{}))
-}
-
 func testHealthCheck(t *testing.T, when spec.G, it spec.S) {
-	it.Before(func() {
-		RegisterTestingT(t)
-	})
 
 	when("test generic health check", func() {
 		var healthCheck *DefaultHealthCheck
@@ -76,7 +68,7 @@ func testHealthCheck(t *testing.T, when spec.G, it spec.S) {
 				result := healthCheck.Receive()
 				Ω(len(result)).Should(Equal(2))
 			})
-			it.Focus("should come back healthy with all three nodes once health check successful", func() {
+			it("should come back healthy with all three nodes once health check successful", func() {
 				healthCheck.Receive()
 				wakeUp <- true
 				result := healthCheck.Receive()
