@@ -13,7 +13,12 @@ import (
 )
 
 func TestGTM(t *testing.T) {
-	spec.Run(t, "TestGTM", composer(testDNSRequest, testHealthCheck, testConfig, testLayer7HealthCheck), spec.Report(report.Terminal{}))
+	spec.Run(t, "TestGTM", composer(
+		testDNSRequest,
+		testHealthCheck,
+		testConfig,
+		testLayer7HealthCheck,
+		testDNSClient), spec.Report(report.Terminal{}))
 }
 
 type specFunc func(*testing.T, spec.G, spec.S)
