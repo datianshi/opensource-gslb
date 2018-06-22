@@ -10,9 +10,9 @@ type HttpCheckClient interface {
 	Get(string) (*http.Response, error)
 }
 
-func Layer7HealthCheck(check HttpCheckClient, schema string, domain string, path string, statusCode int) HealthCheckMethod {
+func Layer7HealthCheck(check HttpCheckClient, schema string, host string, path string, statusCode int) HealthCheckMethod {
 	return func(ip IP) bool {
-		url := fmt.Sprintf("%s:%s/%s", schema, domain, path)
+		url := fmt.Sprintf("%s://%s%s", schema, host, path)
 		resp, err := check.Get(url)
 		if err != nil {
 			log.Println(fmt.Sprintf("Health check to %s failed with error: %s", url, err))
