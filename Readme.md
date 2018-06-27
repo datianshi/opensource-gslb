@@ -118,6 +118,33 @@ For each record, a layer 4 health check endpoint can be configured
 }
 ```
 
-## Future work
+## Layer7 Health Check
 
-* Layer 7 Health Check
+For each record, you can configure a layer7 health check. Health check will do http/https check and match the http return code.
+
+```
+"records": [
+  {
+    "name": "api.test-gtm",
+    "ips": [
+        {
+          "address": "10.193.190.103",
+          "layer7_health_check_host": "simple-api.pks.nsx.shaozhenpcf.com"
+        },
+        {
+          "address": "10.193.148.251",
+          "layer7_health_check_host": "simple-api.pas.nsx-t.shaozhenpcf.com"
+        }
+    ],
+    "ttl" : 5,
+    "health_check" : {
+      "type": "layer7",
+      "https": true,
+      "skip_ssl": true,
+      "frequency": "5s",
+      "path": "/whichcf",
+      "http_status_code": 200
+    }
+  }
+]
+```
