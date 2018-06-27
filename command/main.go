@@ -30,6 +30,9 @@ func main() {
 	}
 	var simpleLoadBalancer gtm.LoadBalancing = func(ips []gtm.IP) string {
 		//Simple Round Robin
+		if len(ips) == 0 {
+			return ""
+		}
 		return ips[rand.Intn(len(ips))].Address
 	}
 	// start server
