@@ -31,7 +31,6 @@ func testHealthCheck(t *testing.T, when spec.G, it spec.S) {
 				removeIP2 = true
 				frequency = 2 * time.Millisecond
 				healthCheck = &DefaultHealthCheck{
-					Port:      port,
 					EndPoints: endpoints,
 					Frequency: frequency,
 					CheckHealth: func(ip IP) bool {

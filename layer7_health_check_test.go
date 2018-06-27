@@ -17,7 +17,6 @@ func testLayer7HealthCheck(t *testing.T, when spec.G, it spec.S) {
 		var (
 			check       *fakes.FakeHttpCheckClient
 			schema      string
-			host        string
 			path        string
 			statusCode  int
 			checkMethod HealthCheckMethod
@@ -27,12 +26,12 @@ func testLayer7HealthCheck(t *testing.T, when spec.G, it spec.S) {
 		it.Before(func() {
 			check = &fakes.FakeHttpCheckClient{}
 			schema = "http"
-			host = "abc.xip.io"
 			path = "/health"
 			statusCode = 200
-			checkMethod = Layer7HealthCheck(check, schema, host, path, statusCode)
+			checkMethod = Layer7HealthCheck(check, schema, path, statusCode)
 			ip = gtm.IP{
 				Address: "x.x.x.x",
+				Host:    "abc.xip.io",
 			}
 		})
 		when("http client return an error", func() {

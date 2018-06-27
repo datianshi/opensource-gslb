@@ -7,15 +7,15 @@ import (
 
 type HealthCheckMethod func(IP) bool
 
-type doNothingHealthCheck struct {
+type DoNothingHealthCheck struct {
 	ips []IP
 }
 
 //Start empty start method
-func (hk *doNothingHealthCheck) Start() {}
+func (hk *DoNothingHealthCheck) Start() {}
 
 //Receive empty
-func (hk *doNothingHealthCheck) Receive() []IP {
+func (hk *DoNothingHealthCheck) Receive() []IP {
 	return hk.ips
 }
 
@@ -28,11 +28,9 @@ func sleepDuration(d time.Duration) sleep {
 }
 
 type DefaultHealthCheck struct {
-	Port            int
 	EndPoints       []IP
 	healthEndpoints *[]IP
 	Frequency       time.Duration
-	control         chan []IP
 	CheckHealth     HealthCheckMethod
 	SleepFunc       sleep
 	started         bool
@@ -45,7 +43,6 @@ func (hk *DefaultHealthCheck) Start() {
 		return
 	}
 	hk.healthEndpoints = &hk.EndPoints
-	hk.control = make(chan []IP)
 	go func() {
 		for {
 			newEndpoint := make([]IP, 0)

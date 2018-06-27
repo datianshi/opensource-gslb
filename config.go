@@ -2,10 +2,8 @@ package gtm
 
 import (
 	"encoding/json"
-	"fmt"
 	"io"
 	"io/ioutil"
-	"time"
 )
 
 type HealthCheck interface {
@@ -37,6 +35,7 @@ type HealthCheckConfig struct {
 	Type           string `json:"type"`
 	PORT           int    `json:"port"`
 	HTTPS          bool   `json:"https"`
+	SkipSSL        bool   `json:"skip_ssl"`
 	PATH           string `json:"path"`
 	HTTPStatusCode int    `json:"http_status_code"`
 	Fequency       string `json:"frequency"`
@@ -44,6 +43,7 @@ type HealthCheckConfig struct {
 
 type IP struct {
 	Address string `json:"address"`
+	Host    string `json:"layer7_health_check_host"`
 }
 
 func ParseConfig(reader io.Reader) (*Config, error) {
@@ -56,30 +56,6 @@ func ParseConfig(reader io.Reader) (*Config, error) {
 	err = json.Unmarshal([]byte(s), &config)
 	if err != nil {
 		return nil, err
-	}
-	for _, domain := range config.Domains {
-		var hk HealthCheckMethod
-		for _, record := range domain.Records {
-			if record.HealthCheckConfig.Type == "layer4" {
-				frequency, err := time.ParseDuration(record.HealthCheckConfig.Fequency)
-				if err != nil {
-					return nil, fmt.Errorf("format of frequency is not valid: %v", err)
-				}
-				hk = Layer4HealthCheck(record.HealthCheckConfig.PORT)
-				record.HealthCheck = &DefaultHealthCheck{
-					EndPoints:   record.IPs,
-					Frequency:   frequency,
-					CheckHealth: hk,
-					SleepFunc:   sleepDuration(frequency),
-				}
-			} else {
-				record.HealthCheck = &doNothingHealthCheck{
-					ips: record.IPs,
-				}
-			}
-			record.HealthCheck.Start()
-		}
-
 	}
 	return &config, err
 }

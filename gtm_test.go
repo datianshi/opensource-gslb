@@ -18,6 +18,7 @@ func TestGTM(t *testing.T) {
 		testHealthCheck,
 		testConfig,
 		testLayer7HealthCheck,
+		testUnmarshalRecord,
 		testDNSClient), spec.Report(report.Terminal{}))
 }
 
